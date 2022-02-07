@@ -39,7 +39,12 @@ class HomeController extends Controller
     {
         // ログインしているユーザー情報をViewに渡す
         $user = \Auth::user();
-        return view('create', compact('user'));
+        // メモ一覧を取得
+        $memos = Memo::where('user_id', $user['id'])
+            ->where('status', 1)
+            ->orderBy('updated_at', 'DESC')
+            ->get();
+        return view('create', compact('user', 'memos'));
     }
 
     public function store(Request $request)
@@ -86,5 +91,13 @@ class HomeController extends Controller
         ->orderBy('updated_at', 'DESC')
         ->get();
         return view('edit', compact('memo', 'memos', 'user'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $inputs = $request->all();
+        Memo::where('id', $id)->update(['content' => $inputs['content']]);
+        // リダイレクト処理
+        return redirect()->route('home');
     }
 }
